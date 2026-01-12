@@ -1,0 +1,59 @@
+<!-- templates/accountant_dashboard.html -->
+{% extends 'base.html' %}
+
+{% block title %}Accountant Dashboard - Ujirani Mwema{% endblock %}
+
+{% block content %}
+<h2>Accountant Dashboard</h2>
+
+<div class="stats">
+    <div class="stat-card">
+        <h3>Total Members</h3>
+        <div class="value">{{ total_members }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Total Collected</h3>
+        <div class="value">TZS {{ total_collected|floatformat:0 }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Members with Unpaid</h3>
+        <div class="value">{{ members_with_unpaid|length }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Quick Actions</h2>
+    <a href="{% url 'member_list' %}" class="btn">👥 View Members</a>
+    <a href="{% url 'reports' %}" class="btn btn-secondary">📊 Reports</a>
+</div>
+
+<div class="card">
+    <h3>Members with Unpaid Months</h3>
+    {% if members_with_unpaid %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Member Name</th>
+                <th>ID</th>
+                <th>Unpaid Months</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in members_with_unpaid %}
+            <tr>
+                <td>{{ item.member.user.get_full_name }}</td>
+                <td>{{ item.member.id_number }}</td>
+                <td>{{ item.unpaid_count }}</td>
+                <td>
+                    <a href="{% url 'manage_member' item.member.id %}" class="btn" style="font-size: 0.9rem;">Manage</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>All members are up to date!</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!-- templates/member_dashboard.html -->
+{% extends 'base.html' %}
+
+{% block title %}My Contributions - Ujirani Mwema{% endblock %}
+
+{% block content %}
+<h2>My Contributions</h2>
+
+<div class="stats">
+    <div class="stat-card">
+        <h3>Total Paid</h3>
+        <div class="value">TZS {{ total_paid|floatformat:0 }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Monthly Amount</h3>
+        <div class="value">TZS {{ monthly_amount|floatformat:0 }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Months Paid</h3>
+        <div class="value">{{ contributions|length }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Payment History</h3>
+    {% if contributions %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Amount</th>
+                <th>Paid Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contribution in contributions %}
+            <tr>
+                <td>{{ contribution.get_month_name }}</td>
+                <td>{{ contribution.year }}</td>
+                <td>TZS {{ contribution.amount|floatformat:0 }}</td>
+                <td>{{ contribution.paid_date|date:"d-m-Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No contributions recorded yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

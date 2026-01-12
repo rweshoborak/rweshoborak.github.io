@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - Ujirani Mwema{% endblock %}
+
+{% block content %}
+<h2>Reports & Statistics</h2>
+
+<!-- Main Statistics Cards -->
+<div class="stats">
+    <div class="stat-card">
+        <h3>Total Members</h3>
+        <div class="value">{{ total_members }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Total Collected</h3>
+        <div class="value" style="color: #28a745;">TZS {{ total_collected|floatformat:0 }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Expected Collection</h3>
+        <div class="value" style="color: #667eea;">TZS {{ total_expected|floatformat:0 }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Collection Rate</h3>
+        <div class="value" style="color: #007bff;">{{ collection_rate }}%</div>
+    </div>
+</div>
+
+<!-- Payment Status Summary -->
+<div class="card">
+    <h3>📊 Payment Status Overview</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="font-size: 2.5rem; font-weight: bold; color: #155724;">{{ fully_paid }}</div>
+            <div style="font-size: 0.95rem; color: #155724; margin-top: 0.5rem; font-weight: 500;">Up to Date</div>
+            <div style="font-size: 0.85rem; color: #0c5460; margin-top: 0.25rem;">All months paid</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="font-size: 2.5rem; font-weight: bold; color: #856404;">{{ partially_paid }}</div>
+            <div style="font-size: 0.95rem; color: #856404; margin-top: 0.5rem; font-weight: 500;">Partially Paid</div>
+            <div style="font-size: 0.85rem; color: #664d03; margin-top: 0.25rem;">Some months unpaid</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="font-size: 2.5rem; font-weight: bold; color: #721c24;">{{ not_paid }}</div>
+            <div style="font-size: 0.95rem; color: #721c24; margin-top: 0.5rem; font-weight: 500;">Not Paid</div>
+            <div style="font-size: 0.85rem; color: #491217; margin-top: 0.25rem;">No payments yet</div>
+        </div>
+    </div>
+
+    <!-- Collection Progress Bar -->
+    <div style="margin-top: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-weight: 500;">Collection Progress</span>
+            <span style="color: #667eea; font-weight: bold;">{{ collection_rate }}%</span>
+        </div>
+        <div style="width: 100%; height: 30px; background: #f0f0f0; border-radius: 15px; overflow: hidden;">
+            <div style="width: {{ collection_rate }}%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.3s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: bold; font-size: 0.9rem;">
+                {% if collection_rate > 0 %}{{ collection_rate }}%{% endif %}
+            </div>
+        </div>
+        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+            TZS {{ total_collected|floatformat:0 }} of TZS {{ total_expected|floatformat:0 }} collected
+        </div>
+    </div>
+</div>
+
+<!-- Member Payment Details -->
+<div class="card">
+    <h3>👥 Detailed Member Payment Status</h3>
+    {% if member_stats %}
+    <div style="overflow-x: auto;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Member Name</th>
+                    <th>ID</th>
+                    <th>Total Paid</th>
+                    <th>Unpaid Months</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in member_stats %}
+                <tr style="border-left: 4px solid {% if stat.status == 'Up to Date' %}#28a745{% elif stat.status == 'Partially Paid' %}#ffc107{% else %}#dc3545{% endif %};">
+                    <td style="font-weight: 500;">{{ stat.member.user.get_full_name }}</td>
+                    <td>
+                        <span style="background: #f0f0f0; padding: 0.25rem 0.5rem; border-radius: 3px; font-family: monospace; font-size: 0.9rem;">{{ stat.member.id_number }}</span>
+                    </td>
+                    <td style="color: #28a745; font-weight: bold;">TZS {{ stat.paid|floatformat:0 }}</td>
+                    <td>
+                        {% if stat.unpaid_months == 0 %}
+                        <span style="background: #d4edda; padding: 0.35rem 0.75rem; border-radius: 3px; color: #155724; font-weight: bold;">0</span>
+                        {% else %}
+                        <span style="background: #fff3cd; padding: 0.35rem 0.75rem; border-radius: 3px; color: #856404; font-weight: bold;">{{ stat.unpaid_months }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if stat.status == 'Up to Date' %}
+                        <span style="background: #d4edda; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; color: #155724; font-weight: 500;">✓ {{ stat.status }}</span>
+                        {% elif stat.status == 'Partially Paid' %}
+                        <span style="background: #fff3cd; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; color: #856404; font-weight: 500;">⚠ {{ stat.status }}</span>
+                        {% else %}
+                        <span style="background: #f8d7da; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; color: #721c24; font-weight: 500;">✗ {{ stat.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color: #999; text-align: center; padding: 2rem 0;">No member data available.</p>
+    {% endif %}
+</div>
+
+<!-- Recent Transactions -->
+<div class="card">
+    <h3>💰 Recent Transactions</h3>
+    <div style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Showing last 50 transactions</div>
+    {% if all_contributions %}
+    <div style="overflow-x: auto;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Month/Year</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contrib in all_contributions %}
+                <tr>
+                    <td style="font-weight: 500;">{{ contrib.member.user.get_full_name }}</td>
+                    <td>
+                        <span style="background: #f0f0f0; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.9rem;">{{ contrib.get_month_name }} {{ contrib.year }}</span>
+                    </td>
+                    <td style="color: #28a745; font-weight: bold;">TZS {{ contrib.amount|floatformat:0 }}</td>
+                    <td style="color: #666; font-size: 0.9rem;">{{ contrib.paid_date|date:"d-m-Y" }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color: #999; text-align: center; padding: 2rem 0;">No contributions recorded yet.</p>
+    {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class="card" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 1px solid #dee2e6;">
+    <h3>🚀 Quick Actions</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div style="background: white; padding: 1rem; border-radius: 4px; border-left: 4px solid #ffc107;">
+            <div style="font-weight: 500; margin-bottom: 0.5rem;">📌 Members with Unpaid Months</div>
+            <p style="margin: 0 0 1rem 0; color: #666; font-size: 0.9rem;">
+                Follow up with members who have pending payments
+            </p>
+            <a href="{% url 'member_list' %}?status=all" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">View Members</a>
+        </div>
+        <div style="background: white; padding: 1rem; border-radius: 4px; border-left: 4px solid #28a745;">
+            <div style="font-weight: 500; margin-bottom: 0.5rem;">✅ Members Up to Date</div>
+            <p style="margin: 0 0 1rem 0; color: #666; font-size: 0.9rem;">
+                {{ fully_paid }} members have paid all required contributions
+            </p>
+            <a href="{% url 'member_list' %}?status=active" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">View Active</a>
+        </div>
+        <div style="background: white; padding: 1rem; border-radius: 4px; border-left: 4px solid #667eea;">
+            <div style="font-weight: 500; margin-bottom: 0.5rem;">💳 Record Payment</div>
+            <p style="margin: 0 0 1rem 0; color: #666; font-size: 0.9rem;">
+                Add new contributions or distribute bulk payments
+            </p>
+            <a href="{% url 'member_list' %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Manage Members</a>
+        </div>
+    </div>
+</div>
+
+<!-- Tips Section -->
+<div class="card" style="background: #f0f8ff; border-left: 4px solid #007bff;">
+    <h3>💡 Report Tips & Insights</h3>
+    <ul style="margin-left: 1.5rem; color: #0c5460; line-height: 1.8;">
+        <li><strong>Collection Rate:</strong> Shows what percentage of expected total has been collected</li>
+        <li><strong>Up to Date:</strong> Members with all required payments made</li>
+        <li><strong>Partially Paid:</strong> Members with some payments but still have unpaid months</li>
+        <li><strong>Not Paid:</strong> Members with no payments recorded yet</li>
+        <li><strong>Recent Transactions:</strong> Shows last 50 payment entries for audit trail</li>
+        <li>Use member list to identify and follow up with members with unpaid months</li>
+    </ul>
+</div>
+
+<div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+    <a href="{% url 'accountant_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+    <a href="{% url 'member_list' %}" class="btn btn-secondary">View Members</a>
+</div>
+{% endblock %}

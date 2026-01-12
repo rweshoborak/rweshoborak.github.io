@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Members List - Ujirani Mwema{% endblock %}
+
+{% block content %}
+<h2>Group Members</h2>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+        <p style="margin: 0;">
+            <strong>Total Members:</strong> <span style="color: #667eea; font-size: 1.2rem; font-weight: bold;">{{ total_members }}</span>
+        </p>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="?status=all" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; {% if status_filter == 'all' or status_filter == '' %}background: #764ba2; color: white;{% else %}background: #f0f0f0; color: #333;{% endif %}">All Members</a>
+            <a href="?status=active" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; {% if status_filter == 'active' %}background: #764ba2; color: white;{% else %}background: #f0f0f0; color: #333;{% endif %}">Active</a>
+            <a href="?status=inactive" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; {% if status_filter == 'inactive' %}background: #764ba2; color: white;{% else %}background: #f0f0f0; color: #333;{% endif %}">Inactive</a>
+        </div>
+    </div>
+
+    {% if members_with_stats %}
+    <div style="overflow-x: auto;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID Number</th>
+                    <th>Phone</th>
+                    <th>Joined Date</th>
+                    <th>Status</th>
+                    <th>Total Paid</th>
+                    <th>Unpaid Months</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in members_with_stats %}
+                <tr>
+                    <td style="font-weight: 500;">{{ item.member.user.get_full_name }}</td>
+                    <td>
+                        <span style="background: #f0f0f0; padding: 0.25rem 0.5rem; border-radius: 3px; font-family: monospace;">{{ item.member.id_number }}</span>
+                    </td>
+                    <td>
+                        {% if item.member.phone %}
+                        <a href="tel:{{ item.member.phone }}" style="color: #667eea; text-decoration: none;">{{ item.member.phone }}</a>
+                        {% else %}
+                        <span style="color: #999;">-</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.member.joined_date|date:"d-m-Y" }}</td>
+                    <td>
+                        {% if item.member.is_active %}
+                        <span style="background: #d4edda; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; color: #155724; font-weight: 500;">✓ Active</span>
+                        {% else %}
+                        <span style="background: #f8d7da; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; color: #721c24; font-weight: 500;">✗ Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: #28a745; font-weight: bold;">TZS {{ item.paid|floatformat:0 }}</td>
+                    <td>
+                        {% if item.unpaid_count == 0 %}
+                        <span style="background: #d4edda; padding: 0.35rem 0.75rem; border-radius: 3px; color: #155724; font-weight: bold; display: inline-block;">0</span>
+                        {% else %}
+                        <span style="background: #fff3cd; padding: 0.35rem 0.75rem; border-radius: 3px; color: #856404; font-weight: bold; display: inline-block;">{{ item.unpaid_count }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'manage_member' item.member.id %}" class="btn" style="font-size: 0.85rem; padding: 0.5rem 0.9rem;">Manage</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ddd; color: #666; font-size: 0.9rem;">
+        <p>💡 <strong>Tip:</strong> Click "Manage" to add contributions, distribute payments, or view payment history for any member.</p>
+    </div>
+    {% else %}
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 4px; text-align: center;">
+        <p style="margin: 0; color: #666; font-size: 1rem;">
+            No members found with current filter.
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Member Statistics Summary -->
+<div class="card">
+    <h3>Members Summary</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        {% for item in members_with_stats %}
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px; border-left: 4px solid {% if item.unpaid_count == 0 %}#28a745{% elif item.unpaid_count > 0 %}#ffc107{% endif %};">
+            <div style="font-weight: 500; margin-bottom: 0.5rem;">{{ item.member.user.get_full_name }}</div>
+            <div style="font-size: 0.9rem; color: #666;">
+                ID: {{ item.member.id_number }}<br>
+                Paid: <span style="color: #28a745; font-weight: bold;">TZS {{ item.paid|floatformat:0 }}</span><br>
+                Unpaid: <span style="{% if item.unpaid_count == 0 %}color: #28a745;{% else %}color: #ffc107;{% endif %} font-weight: bold;">{{ item.unpaid_count }} months</span>
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: #999;">No members to display</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div style="margin-top: 2rem; display: flex; gap: 1rem;">
+    <a href="{% url 'accountant_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+    <a href="{% url 'reports' %}" class="btn btn-secondary">View Reports</a>
+</div>
+{% endblock %}

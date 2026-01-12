@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+
+{% block title %}My Contributions - Ujirani Mwema{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2>My Contributions</h2>
+    <div style="text-align: right;">
+        <div style="font-size: 0.9rem; color: #666;">Welcome,</div>
+        <div style="font-size: 1.1rem; font-weight: bold; color: #667eea;">{{ user.get_full_name }}</div>
+    </div>
+</div>
+
+<!-- Main Statistics Cards -->
+<div class="stats">
+    <div class="stat-card">
+        <h3>Total Paid</h3>
+        <div class="value" style="color: #28a745;">TZS {{ total_paid|floatformat:0 }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Monthly Amount</h3>
+        <div class="value" style="color: #667eea;">TZS {{ monthly_amount|floatformat:0 }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Months Paid</h3>
+        <div class="value" style="color: #007bff;">{{ contributions|length }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Total Expected</h3>
+        <div class="value" style="color: #ffc107;">TZS {{ monthly_amount|floatformat:0 }}</div>
+    </div>
+</div>
+
+<!-- Payment Status Overview -->
+<div class="card">
+    <h3>📊 Your Payment Status</h3>
+    {% if contributions %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #155724;">✓</div>
+            <div style="font-size: 1.1rem; color: #155724; margin-top: 0.5rem; font-weight: 500;">{{ contributions|length }} Months Paid</div>
+            <div style="font-size: 0.9rem; color: #0c5460; margin-top: 0.25rem;">All recorded contributions</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #cfe2ff 0%, #b6d4fe 100%); padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #0c63e4;">💰</div>
+            <div style="font-size: 1.1rem; color: #0c63e4; margin-top: 0.5rem; font-weight: 500;">TZS {{ total_paid|floatformat:0 }}</div>
+            <div style="font-size: 0.9rem; color: #084298; margin-top: 0.25rem;">Total contribution amount</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 1.5rem; border-radius: 8px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #856404;">📅</div>
+            <div style="font-size: 1.1rem; color: #856404; margin-top: 0.5rem; font-weight: 500;">{{ monthly_amount|floatformat:0 }} TZS</div>
+            <div style="font-size: 0.9rem; color: #664d03; margin-top: 0.25rem;">Monthly requirement</div>
+        </div>
+    </div>
+
+    <!-- Payment Progress Bar -->
+    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd;">
+        <h4 style="margin-bottom: 1rem;">Payment Progress</h4>
+        <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-weight: 500;">{{ contributions|length }} of {{ contributions|length }} months paid</span>
+            <span style="color: #28a745; font-weight: bold; margin-left: auto;">100%</span>
+        </div>
+        <div style="width: 100%; height: 25px; background: #f0f0f0; border-radius: 12px; overflow: hidden;">
+            <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #28a745 0%, #20c997 100%); display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: bold; font-size: 0.9rem;">
+                100%
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 4px; text-align: center;">
+        <div style="font-size: 1.2rem; margin-bottom: 1rem;">📭</div>
+        <p style="margin: 0; color: #666; font-size: 1rem;">No contributions recorded yet.</p>
+        <p style="margin: 0.5rem 0 0 0; color: #999; font-size: 0.9rem;">Contact your accountant to record your payments.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Payment History Table -->
+<div class="card">
+    <h3>💳 Payment History</h3>
+    {% if contributions %}
+    <div style="overflow-x: auto;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Month</th>
+                    <th style="width: 15%;">Year</th>
+                    <th style="width: 20%;">Amount</th>
+                    <th style="width: 25%;">Paid Date</th>
+                    <th style="width: 20%;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contribution in contributions %}
+                <tr style="border-left: 4px solid #28a745;">
+                    <td style="font-weight: 500;">{{ contribution.get_month_name }}</td>
+                    <td>{{ contribution.year }}</td>
+                    <td style="color: #28a745; font-weight: bold; font-size: 1.05rem;">TZS {{ contribution.amount|floatformat:0 }}</td>
+                    <td style="color: #666;">{{ contribution.paid_date|date:"d-m-Y (D)" }}</td>
+                    <td>
+                        <span style="background: #d4edda; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; color: #155724; font-weight: 500;">✓ Paid</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Summary Info -->
+    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #ddd;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px;">
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Average Payment</div>
+                <div style="font-size: 1.3rem; font-weight: bold; color: #667eea;">
+                    TZS {{ monthly_amount|floatformat:0 }}
+                </div>
+            </div>
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px;">
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Last Payment Date</div>
+                <div style="font-size: 1.3rem; font-weight: bold; color: #28a745;">
+                    {% if contributions %}{{ contributions.0.paid_date|date:"d-m-Y" }}{% else %}—{% endif %}
+                </div>
+            </div>
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px;">
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">First Payment Date</div>
+                <div style="font-size: 1.3rem; font-weight: bold; color: #007bff;">
+                    {% if contributions %}
+                        {% for contrib in contributions reversed %}
+                            {% if forloop.last %}
+                                {{ contrib.paid_date|date:"d-m-Y" }}
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}—{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 4px; text-align: center;">
+        <p style="margin: 0; color: #666; font-size: 1rem;">No payment history available.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Important Information -->
+<div class="card" style="background: linear-gradient(135deg, #e7f3ff 0%, #f0f8ff 100%); border-left: 4px solid #667eea;">
+    <h3 style="color: #667eea;">ℹ️ Important Information</h3>
+    <ul style="margin-left: 1.5rem; color: #0c5460; line-height: 2;">
+        <li><strong>Monthly Requirement:</strong> TZS {{ monthly_amount|floatformat:0 }} per month</li>
+        <li><strong>Payment Method:</strong> Contact your accountant for payment instructions</li>
+        <li><strong>Payment Date:</strong> Payments should be made by the end of each month</li>
+        <li><strong>Confirmation:</strong> Only payments marked as "Paid" appear in your history</li>
+        <li><strong>Questions:</strong> Please contact your group accountant for any inquiries</li>
+    </ul>
+</div>
+
+<!-- Action Section -->
+<div class="card" style="background: #f8f9fa; border: 1px solid #dee2e6;">
+    <h3>🔧 Actions</h3>
+    <p style="color: #666; margin-bottom: 1rem;">What would you like to do?</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <a href="{% url 'member_dashboard' %}" class="btn" style="text-align: center; text-decoration: none; padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; cursor: pointer;">
+            <span style="font-size: 1.3rem;">🔄</span>
+            <span style="font-weight: 500;">Refresh Data</span>
+        </a>
+        <a href="{% url 'login' %}" class="btn btn-secondary" style="text-align: center; text-decoration: none; padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; border: none; border-radius: 4px; cursor: pointer;">
+            <span style="font-size: 1.3rem;">🚪</span>
+            <span style="font-weight: 500;">Logout</span>
+        </a>
+    </div>
+</div>
+
+<!-- Footer Note -->
+<div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 4px; text-align: center; color: #666; font-size: 0.9rem;">
+    <p style="margin: 0;">
+        Last updated: <span id="update-time">just now</span>
+    </p>
+    <p style="margin: 0.5rem 0 0 0; color: #999;">
+        Your data is automatically synced with the group database
+    </p>
+</div>
+
+<script>
+    // Update timestamp
+    function updateTimestamp() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        document.getElementById('update-time').textContent = timeString;
+    }
+
+    // Update on page load and every minute
+    updateTimestamp();
+    setInterval(updateTimestamp, 60000);
+</script>
+{% endblock %}
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block title %}My Contributions - Ujirani Mwema{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">#}
+{#    <h2>My Contributions</h2>#}
+{#    <div style="text-align: right;">#}
+{#        <div style="font-size: 0.9rem; color: #666;">Welcome,</div>#}
+{#        <div style="font-size: 1.1rem; font-weight: bold; color: #667eea;">{{ user.get_full_name }}</div>#}
+{#    </div>#}
+{#</div>#}
+{##}
+{#<!-- Main Statistics Cards -->#}
+{#<div class="stats">#}
+{#    <div class="stat-card">#}
+{#        <h3>Total Paid</h3>#}
+{#        <div class="value" style="color: #28a745;">TZS {{ total_paid|floatformat:0 }}</div>#}
+{#    </div>#}
+{#    <div class="stat-card">#}
+{#        <h3>Monthly Amount</h3>#}
+{#        <div class="value" style="color: #667eea;">TZS {{ monthly_amount|floatformat:0 }}</div>#}
+{#    </div>#}
+{#    <div class="stat-card">#}
+{#        <h3>Months Paid</h3>#}
+{#        <div class="value" style="color: #007bff;">{{ contributions|length }}</div>#}
+{#    </div>#}
+{#    <div class="stat-card">#}
+{#        <h3>Expected Payment</h3>#}
+{#        <div class="value" style="color: #ffc107;">TZS TZS {{ expected_payment|floatformat:0 }}</div>#}
+{#    </div>#}
+{#</div>#}
+{##}
+{#<!-- Payment Status Overview -->#}
+{#<div class="card">#}
+{#    <h3>📊 Your Payment Status</h3>#}
+{#    {% if contributions %}#}
+{#    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">#}
+{#        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 1.5rem; border-radius: 8px; text-align: center;">#}
+{#            <div style="font-size: 2rem; font-weight: bold; color: #155724;">✓</div>#}
+{#            <div style="font-size: 1.1rem; color: #155724; margin-top: 0.5rem; font-weight: 500;">{{ contributions|length }} Months Paid</div>#}
+{#            <div style="font-size: 0.9rem; color: #0c5460; margin-top: 0.25rem;">All recorded contributions</div>#}
+{#        </div>#}
+{#        <div style="background: linear-gradient(135deg, #cfe2ff 0%, #b6d4fe 100%); padding: 1.5rem; border-radius: 8px; text-align: center;">#}
+{#            <div style="font-size: 2rem; font-weight: bold; color: #0c63e4;">💰</div>#}
+{#            <div style="font-size: 1.1rem; color: #0c63e4; margin-top: 0.5rem; font-weight: 500;">TZS {{ total_paid|floatformat:0 }}</div>#}
+{#            <div style="font-size: 0.9rem; color: #084298; margin-top: 0.25rem;">Total contribution amount</div>#}
+{#        </div>#}
+{#        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 1.5rem; border-radius: 8px; text-align: center;">#}
+{#            <div style="font-size: 2rem; font-weight: bold; color: #856404;">📅</div>#}
+{#            <div style="font-size: 1.1rem; color: #856404; margin-top: 0.5rem; font-weight: 500;">{{ monthly_amount|floatformat:0 }} TZS</div>#}
+{#            <div style="font-size: 0.9rem; color: #664d03; margin-top: 0.25rem;">Monthly requirement</div>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{#    <!-- Payment Progress Bar -->#}
+{#    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ddd;">#}
+{#        <h4 style="margin-bottom: 1rem;">Payment Progress</h4>#}
+{#        <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">#}
+{#            <span style="font-weight: 500;">{{ contributions|length }} of {{ contributions|length }} months paid</span>#}
+{#            <span style="color: #28a745; font-weight: bold; margin-left: auto;">100%</span>#}
+{#        </div>#}
+{#        <div style="width: 100%; height: 25px; background: #f0f0f0; border-radius: 12px; overflow: hidden;">#}
+{#            <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #28a745 0%, #20c997 100%); display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: bold; font-size: 0.9rem;">#}
+{#                100%#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    {% else %}#}
+{#    <div style="background: #f8f9fa; padding: 2rem; border-radius: 4px; text-align: center;">#}
+{#        <div style="font-size: 1.2rem; margin-bottom: 1rem;">📭</div>#}
+{#        <p style="margin: 0; color: #666; font-size: 1rem;">No contributions recorded yet.</p>#}
+{#        <p style="margin: 0.5rem 0 0 0; color: #999; font-size: 0.9rem;">Contact your accountant to record your payments.</p>#}
+{#    </div>#}
+{#    {% endif %}#}
+{#</div>#}
+{##}
+{#<!-- Payment History Table -->#}
+{#<div class="card">#}
+{#    <h3>💳 Payment History</h3>#}
+{#    {% if contributions %}#}
+{#    <div style="overflow-x: auto;">#}
+{#        <table class="table">#}
+{#            <thead>#}
+{#                <tr>#}
+{#                    <th style="width: 20%;">Month</th>#}
+{#                    <th style="width: 15%;">Year</th>#}
+{#                    <th style="width: 20%;">Amount</th>#}
+{#                    <th style="width: 25%;">Paid Date</th>#}
+{#                    <th style="width: 20%;">Status</th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                {% for contribution in contributions %}#}
+{#                <tr style="border-left: 4px solid #28a745;">#}
+{#                    <td style="font-weight: 500;">{{ contribution.get_month_name }}</td>#}
+{#                    <td>{{ contribution.year }}</td>#}
+{#                    <td style="color: #28a745; font-weight: bold; font-size: 1.05rem;">TZS {{ contribution.amount|floatformat:0 }}</td>#}
+{#                    <td style="color: #666;">{{ contribution.paid_date|date:"d-m-Y (D)" }}</td>#}
+{#                    <td>#}
+{#                        <span style="background: #d4edda; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; color: #155724; font-weight: 500;">✓ Paid</span>#}
+{#                    </td>#}
+{#                </tr>#}
+{#                {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#    </div>#}
+{##}
+{#    <!-- Summary Info -->#}
+{#    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #ddd;">#}
+{#        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">#}
+{#            <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px;">#}
+{#                <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Average Payment</div>#}
+{#                <div style="font-size: 1.3rem; font-weight: bold; color: #667eea;">#}
+{#                    TZS {% if contributions %}{{ total_paid|add:0|divisibleby:contributions|floatformat:0 }}{% else %}0{% endif %}#}
+{#                </div>#}
+{#            </div>#}
+{#            <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px;">#}
+{#                <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Last Payment Date</div>#}
+{#                <div style="font-size: 1.3rem; font-weight: bold; color: #28a745;">#}
+{#                    {% if contributions %}{{ contributions.0.paid_date|date:"d-m-Y" }}{% else %}—{% endif %}#}
+{#                </div>#}
+{#            </div>#}
+{#            <div style="background: #f8f9fa; padding: 1rem; border-radius: 4px;">#}
+{#                <div style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">First Payment Date</div>#}
+{#                <div style="font-size: 1.3rem; font-weight: bold; color: #007bff;">#}
+{#                    {% if contributions %}{{ contributions|last|date:"d-m-Y" }}{% else %}—{% endif %}#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    {% else %}#}
+{#    <div style="background: #f8f9fa; padding: 2rem; border-radius: 4px; text-align: center;">#}
+{#        <p style="margin: 0; color: #666; font-size: 1rem;">No payment history available.</p>#}
+{#    </div>#}
+{#    {% endif %}#}
+{#</div>#}
+{##}
+{#<!-- Important Information -->#}
+{#<div class="card" style="background: linear-gradient(135deg, #e7f3ff 0%, #f0f8ff 100%); border-left: 4px solid #667eea;">#}
+{#    <h3 style="color: #667eea;">ℹ️ Important Information</h3>#}
+{#    <ul style="margin-left: 1.5rem; color: #0c5460; line-height: 2;">#}
+{#        <li><strong>Monthly Requirement:</strong> TZS {{ monthly_amount|floatformat:0 }} per month</li>#}
+{#        <li><strong>Payment Method:</strong> Contact your accountant for payment instructions</li>#}
+{#        <li><strong>Payment Date:</strong> Payments should be made by the end of each month</li>#}
+{#        <li><strong>Confirmation:</strong> Only payments marked as "Paid" appear in your history</li>#}
+{#        <li><strong>Questions:</strong> Please contact your group accountant for any inquiries</li>#}
+{#    </ul>#}
+{#</div>#}
+{##}
+{#<!-- Action Section -->#}
+{#<div class="card" style="background: #f8f9fa; border: 1px solid #dee2e6;">#}
+{#    <h3>🔧 Actions</h3>#}
+{#    <p style="color: #666; margin-bottom: 1rem;">What would you like to do?</p>#}
+{#    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">#}
+{#        <a href="{% url 'member_dashboard' %}" class="btn" style="text-align: center; text-decoration: none; padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; cursor: pointer;">#}
+{#            <span style="font-size: 1.3rem;">🔄</span>#}
+{#            <span style="font-weight: 500;">Refresh Data</span>#}
+{#        </a>#}
+{#        <a href="{% url 'login' %}" class="btn btn-secondary" style="text-align: center; text-decoration: none; padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; border: none; border-radius: 4px; cursor: pointer;">#}
+{#            <span style="font-size: 1.3rem;">🚪</span>#}
+{#            <span style="font-weight: 500;">Logout</span>#}
+{#        </a>#}
+{#    </div>#}
+{#</div>#}
+{##}
+{#<!-- Footer Note -->#}
+{#<div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 4px; text-align: center; color: #666; font-size: 0.9rem;">#}
+{#    <p style="margin: 0;">#}
+{#        Last updated: <span id="update-time">just now</span>#}
+{#    </p>#}
+{#    <p style="margin: 0.5rem 0 0 0; color: #999;">#}
+{#        Your data is automatically synced with the group database#}
+{#    </p>#}
+{#</div>#}
+{##}
+{#<script>#}
+{#    // Update timestamp#}
+{#    function updateTimestamp() {#}
+{#        const now = new Date();#}
+{#        const timeString = now.toLocaleTimeString('en-US', {#}
+{#            hour: '2-digit',#}
+{#            minute: '2-digit',#}
+{#            hour12: true#}
+{#        });#}
+{#        document.getElementById('update-time').textContent = timeString;#}
+{#    }#}
+{##}
+{#    // Update on page load and every minute#}
+{#    updateTimestamp();#}
+{#    setInterval(updateTimestamp, 60000);#}
+{#</script>#}
+{#{% endblock %}#}
