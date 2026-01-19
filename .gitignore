@@ -4,4 +4,4 @@ venv/
     *.py[cod]
     *.sqlite3
     .env
-    .DS_Store
+    .DS_Storedb.sqlite3
